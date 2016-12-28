@@ -46,15 +46,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         recyclerView.addItemDecoration (new MyDividerItemDecoration (this,LinearLayoutManager.VERTICAL));
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("score-boards");
+        myRef = database.getReference("score-boards").child ("0").child ("scores");
        // helper = new FirebaseHelper(myRef.child("0"));
         //adapter = new MyRecycle(helper.retrieve());
+        Query query = myRef.orderByChild ("score").limitToLast (5);
 
-
-        myRef.child ("0").orderByChild ("scores").limitToFirst (5).addChildEventListener(new ChildEventListener() {
+        query.addValueEventListener (new ValueEventListener () {
             @Override
-            public void onChildAdded (DataSnapshot dataSnapshot, String s){
-
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
                     GetData getData = new GetData();
@@ -71,30 +70,10 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
-            @Override
-            public void onChildChanged (DataSnapshot dataSnapshot, String s){
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                    GetData getData = new GetData();
-                    getData.setUsername(ds.child("username").getValue().toString());
-                    getData.setScore( ds.child("score").getValue().toString ());
-                    System.out.println(getData.getUsername());
-                    System.out.println(getData.getScore());
-                    list.add(getData);
-                    adapter = new MyRecycle(MainActivity.this,list);
-                    recyclerView.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-                }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-            }
-            @Override
-            public void onChildRemoved (DataSnapshot dataSnapshot){
-            }
-            @Override
-            public void onChildMoved (DataSnapshot dataSnapshot, String s){
-            }
-            @Override
-            public void onCancelled (DatabaseError databaseError){
             }
         });
 
