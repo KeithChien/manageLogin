@@ -1,5 +1,6 @@
 package com.example.user.managelogin;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -7,7 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.widget.Toolbar;
 
-import com.example.user.managelogin.Recycler.FirebaseHelper;
+
 import com.example.user.managelogin.Recycler.MyDividerItemDecoration;
 import com.example.user.managelogin.Recycler.MyRecycle;
 import com.example.user.managelogin.Data.GetData;
@@ -23,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     MyRecycle adapter;
     private GetData getData;
-   // FirebaseHelper helper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +47,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         recyclerView.addItemDecoration (new MyDividerItemDecoration (this,LinearLayoutManager.VERTICAL));
+
         database = FirebaseDatabase.getInstance();
+
         myRef = database.getReference("score-boards").child ("0").child ("scores");
-       // helper = new FirebaseHelper(myRef.child("0"));
-        //adapter = new MyRecycle(helper.retrieve());
-        Query query = myRef.orderByChild ("score").limitToLast (5);
+
+        Query query = myRef.orderByChild ("score").limitToFirst (10);
 
         query.addValueEventListener (new ValueEventListener () {
             @Override
@@ -60,14 +63,15 @@ public class MainActivity extends AppCompatActivity {
                     getData.setUsername(ds.child("username").getValue().toString());
                     getData.setScore(ds.child("score").getValue().toString());
 
-                    System.out.println(getData.getUsername());
-                    System.out.println(getData.getScore());
+                   // System.out.println(getData.getUsername());
+                    //System.out.println(getData.getScore());
                     list.add(getData);
-                    adapter = new MyRecycle(MainActivity.this,list);
-                    recyclerView.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
 
                 }
+                Collections.reverse (list);
+                adapter = new MyRecycle(MainActivity.this,list);
+                recyclerView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
 
             }
 
