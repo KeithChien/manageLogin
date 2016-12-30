@@ -22,14 +22,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.sql.Timestamp;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Collections;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase database;
     DatabaseReference myRef;
+    DatabaseReference timeRef;
     //FirebaseAuth.AuthStateListener firebaseAuthListener;
     //FirebaseUser mfirebaseUser;
     //FirebaseAuth mfirebaseAuth;
@@ -37,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     MyRecycle adapter;
     private GetData getData;
+    long startTime;
+    long endTime;
 
 
     @Override
@@ -47,13 +54,42 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         recyclerView.addItemDecoration (new MyDividerItemDecoration (this,LinearLayoutManager.VERTICAL));
-
+        //timeRef = database.getReference ("score-boards");
         database = FirebaseDatabase.getInstance();
 
-        myRef = database.getReference("score-boards").child ("0").child ("scores");
+        myRef = database.getReference("score-boards").child ("0");
 
-        Query query = myRef.orderByChild ("score").limitToFirst (10);
 
+        myRef.addValueEventListener (new ValueEventListener () {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long startTime = (long) dataSnapshot.child ("startDateInterval").getValue ();
+                long endTime = (long) dataSnapshot.child ("endDateInterval").getValue ();
+                Timestamp timestamp1 = new Timestamp (startTime);
+                Timestamp timestamp2 = new Timestamp (endTime);
+                Long tslong = System.currentTimeMillis ()/1000;
+                Timestamp timestamp4 =new Timestamp(tslong);
+
+                if (timestamp1.before (timestamp4) && timestamp2.after (timestamp4)) {
+                    queryTop ();
+                    System.out.println ("時間OK");
+                } else {
+                    System.out.println ("時間錯誤");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
+
+    }
+    public void queryTop(){
+        Query query = myRef.child ("scores").orderByChild ("score").limitToFirst (10);
         query.addValueEventListener (new ValueEventListener () {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -63,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     getData.setUsername(ds.child("username").getValue().toString());
                     getData.setScore(ds.child("score").getValue().toString());
 
-                   // System.out.println(getData.getUsername());
+                    // System.out.println(getData.getUsername());
                     //System.out.println(getData.getScore());
                     list.add(getData);
 
@@ -81,8 +117,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
 
+    }
 
 
 }
