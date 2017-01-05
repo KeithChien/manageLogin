@@ -37,13 +37,14 @@ public class LoginActivity extends AppCompatActivity {
         mfirebaseAuth = FirebaseAuth.getInstance();
         accountText = (EditText) findViewById(R.id.editText);
         passWordText = (EditText) findViewById(R.id.editText2);
-        Button buttonLogin = (Button) findViewById(R.id.button);
+        buttonLogin = (Button) findViewById(R.id.button);
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 eMailLogin();
                 checkManager();
+                finish ();
 
             }
         });
@@ -79,8 +80,9 @@ public class LoginActivity extends AppCompatActivity {
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                System.out.println(dataSnapshot.getValue());  //prints "Do you have data? You'll love Firebase."
-                if (account.equalsIgnoreCase(dataSnapshot.child("account").getValue().toString()) || acpassword.equalsIgnoreCase(dataSnapshot.child("password").getValue().toString())) {
+
+                if (account.equalsIgnoreCase(dataSnapshot.child("account").getValue().toString()) && acpassword.equalsIgnoreCase(dataSnapshot.child("password").getValue().toString())) {
+
                     Intent intent = new Intent();
                     intent.setClass(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
